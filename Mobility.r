@@ -339,10 +339,12 @@ bothQualitative <- function(qual1, qual2, name1, name2) {
   } else {
     n <- sum(table(qual2))
   }
+  tableAux <- table(qual1, qual2, dnn=c(name1, name2))
   print(paste('Joint Absolute Frequency for', name1, 'and', name2, ': '))
-  print(table(qual1, qual2, dnn=c(name1, name2)))
+  print(tableAux)
   print(paste('Joint Relative Frequency for', name1, 'and', name2, ': '))
-  print(table(qual1, qual2, dnn=c(name1, name2))/n)
+  print(tableAux/n)
+  barplot(tableAux, beside=TRUE, legend = rownames(tableAux), xlab=name2)
 }
 
 bothQualitative(DriversLicense, VehicleInProperty, "DriversLicense", "VehicleInProperty")
@@ -371,4 +373,36 @@ bothQualitative(TypeOfNewMobility, HourRange, "TypeOfNewMobility", "HourRange")
 
 ## One qualitative, one quantitative --> Box plots, Histograms and Summary Statistics conditioning
 # on the different values of the qualitative variable
+
+### The following analysis are considering only people who use new mobility services!!!
+
+## Given DriversLicense (Yes/No): 
+# CostLastTrip (Who spends more?)
+# UsagePerMonth (Who uses it more often?)
+# UsageTime (Who uses it more time?)
+
+## Given TypesOfNewMobility != 'I don't use any': [car vs motorbike vs bike/mopad]
+# CostLastTrip (Who spends more?) 
+# UsagePerMonth (Who uses it more often?)
+# UsageTime (Who uses it more time?)
+
+## Given VehicleInProperty:
+# CostLastTrip (Who spends more?) 
+# UsagePerMonth (Who uses it more often?)
+# UsageTime (Who uses it more time?)
+
+## Given HourRange: (this one could be a problem since there are not enough samples)
+# CostLastTrip (Who spends more?) 
+# UsagePerMonth (Who uses it more often?)
+# UsageTime (Who uses it more time?)
+
+## Given RightSlowerVehicles:
+# CostLastTrip (Who spends more?) 
+# UsagePerMonth (Who uses it more often?)
+# UsageTime (Who uses it more time?)
+
+### Both Quantitative
+# Sample covariance
+# Sample correlation
+# Scatter plots
 
