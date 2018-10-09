@@ -266,11 +266,103 @@ describeContinuous(newMobility$CostLastTrip)
 
 locationMeasures <- function(data) {
   print('Mean: ')
-  print(mean(data))
+  print(mean(table(data)))
   print('Median: ')
-  print(median(data))
+  print(median(table(data)))
+  print('First Quartile: ')
+  Q1 <- quantile(table(data), probs = 0.25)
+  print(Q1)
+  print('Third Quartile: ')
+  Q3 <- quantile(table(data), probs = 0.75)
+  print(Q3)
+  print('InterQuartile Range: ')
+  IQR <- Q3-Q1
+  print(IQR)
+  print('Outliers below: ')
+  print(Q1-1.5*IQR)
+  print('Outliers above: ')
+  print(Q3+1.5*IQR)
+  boxplot(data)
 }
 
 locationMeasures(CostLastTrip)
 locationMeasures(UsageTime)
+
+library(e1071)
+
+dispersionMeasures <- function(data) {
+  data <- table(data)
+  print('Variance: ')
+  print(var(data))
+  print('Standard deviation: ')
+  print(sd(data))
+  print('Sample median absolute deviation: ')
+  print(mad(data))
+  print('Coefficient of variation: ')
+  print(sd(data)/mean(data))
+  print('Skewness coeff: ')
+  print(skewness(data))
+  if (skewness(data) < 0) {
+    print('Left skewness')
+  } else if (skewness(data) > 0) {
+    print('Right skewness')
+  }
+}
+
+dispersionMeasures(CostLastTrip)
+dispersionMeasures(UsageTime)
+
+## Both Qualitative Pairs
+# DriversLicense vs VehicleInProperty
+# DriversLicense vs UseNewMobility
+# DriversLicense vs TypeOfNewMobility
+# DriversLicense vs RightSlowerVehicles
+# DriversLicense vs HourRange
+# VehicleInProperty vs UseNewMobility
+# VehicleInProperty vs TypesOfNewMobility
+# VehicleInProperty vs RightSlowerVehicles
+# VehicleInProperty vs HourRange
+# UseNewMobility vs TypeOfNewMobility
+# UseNewMobility vs RightSlowerVehicles
+# UseNewMobility vs HourRange
+# TypeOfNewMobility vs RightSlowerVehicles
+# TypeOfNewMobility vs HourRange
+# RightSlowerVehicles vs HourRange
+
+bothQualitative <- function(qual1, qual2, name1, name2) {
+  n <- 1
+  if (sum(table(qual1)) == sum(table(qual2))) {
+    n <- sum(table(qual1))
+  } else if (sum(table(qual1)) < sum(table(qual2))) {
+    n <- sum(table(qual1))
+  } else {
+    n <- sum(table(qual2))
+  }
+  print(paste('Joint Absolute Frequency for', name1, 'and', name2, ': '))
+  print(table(qual1, qual2, dnn=c(name1, name2)))
+  print(paste('Joint Relative Frequency for', name1, 'and', name2, ': '))
+  print(table(qual1, qual2, dnn=c(name1, name2))/n)
+}
+
+bothQualitative(DriversLicense, VehicleInProperty, "DriversLicense", "VehicleInProperty")
+bothQualitative(DriversLicense, UseNewMobility, "DriversLicense", "UseNewMobility")
+bothQualitative(DriversLicense, TypeOfNewMobility, "DriversLicense", "TypeOfNewMobility")
+bothQualitative(DriversLicense, RightSlowerVehicles, "DriversLicense", "RightSlowerVehicles")
+# This one doesn't really represent anything...
+bothQualitative(DriversLicense, HourRange, "DriversLicense", "HourRange")
+bothQualitative(VehicleInProperty, UseNewMobility, "VehicleInProperty", "UseNewMobility")
+bothQualitative(VehicleInProperty, TypeOfNewMobility, "VehicleInProperty", "TypeOfNewMobility")
+# This one is interesting for some analysis
+bothQualitative(VehicleInProperty, RightSlowerVehicles, "VehicleInProperty", "RightSlowerVehicles")
+# Don't really know what could we get out of this one
+bothQualitative(VehicleInProperty, HourRange, "VehicleInProperty", "HourRange")
+# This shows that there might be people that don't know how to read... 
+bothQualitative(UseNewMobility, TypeOfNewMobility, "UseNewMobility", "TypeOfNewMobility")
+bothQualitative(UseNewMobility, RightSlowerVehicles, "UseNewMobility", "RightSlowerVehicles")
+# This one doesn't really represent anything, since only cares about people who use new mobility
+bothQualitative(UseNewMobility, HourRange, "UseNewMobility", "HourRange")
+# Doesn't make sense to me... why would there be people that use bikes and mopads and think that they shouldn't go in the road?
+bothQualitative(TypeOfNewMobility, RightSlowerVehicles, "TypeOfNewMobility", "RightSlowerVehicles")
+# This table is too big to show anything
+bothQualitative(TypeOfNewMobility, HourRange, "TypeOfNewMobility", "HourRange")
 
