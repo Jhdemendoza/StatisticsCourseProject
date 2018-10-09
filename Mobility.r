@@ -8,17 +8,18 @@ attach(newMobility)
 parseUsageTime <- function(dataset){
   dataset$UsageTime <- dataset$X5Min
   dataset$UsageTime <- as.character(dataset$UsageTime)
-  dataset[dataset$UsageTime == "Column 1",]$UsageTime <- 5
-  dataset[dataset$X10Min == "Column 1",]$UsageTime <- 10
-  dataset[dataset$X15Min == "Column 1",]$UsageTime <- 15
-  dataset[dataset$X20Min == "Column 1",]$UsageTime <- 20
-  dataset[dataset$X.20Min == "Column 1",]$UsageTime <- 21
+  dataset[dataset$UsageTime == "Column 1",]$UsageTime <- as.numeric(5,0)
+  dataset[dataset$X10Min == "Column 1",]$UsageTime <- as.numeric(10,0)
+  dataset[dataset$X15Min == "Column 1",]$UsageTime <- as.numeric(15,0)
+  dataset[dataset$X20Min == "Column 1",]$UsageTime <- as.numeric(20,0)
+  dataset[dataset$X.20Min == "Column 1",]$UsageTime <- as.numeric(21.0)
+  dataset$UsageTime[dataset$UsageTime == ""] <- NA
   dataset$X5Min <- NULL
   dataset$X10Min <- NULL
   dataset$X15Min <- NULL
   dataset$X20Min <- NULL
   dataset$X.20Min <- NULL
-  dataset$UsageTime <- as.factor(dataset$UsageTime)
+  dataset$UsageTime <- as.numeric(dataset$UsageTime)
   return(dataset)
 }
 
@@ -27,16 +28,16 @@ newMobility$X <- NULL
 
 parseTypeOfNewMobility <- function(dataset) {
   ### Codes for each class: 
-  # 0 -> 'I don't use ant new mobility services'
-  # 1 -> 'Carsharing'
-  # 2 -> 'Motorsharing'
-  # 3 -> 'Other (Lime, BiciMAD, etc)'
+  # No -> 'I don't use ant new mobility services'
+  # Car -> 'Carsharing'
+  # Moto -> 'Motorsharing'
+  # Other -> 'Other (Lime, BiciMAD, etc)'
   dataset$TypeOfNewMobility <- as.character(dataset$TypeOfNewMobility)
   dataset[dataset$TypeOfNewMobility == "",]$TypeOfNewMobility <- "I don't use any new mobility servises"
-  dataset[dataset$TypeOfNewMobility == "I don't use any new mobility servises",]$TypeOfNewMobility <- 0
-  dataset[dataset$TypeOfNewMobility == "Carsharing",]$TypeOfNewMobility <- 1
-  dataset[dataset$TypeOfNewMobility == "Motosharing",]$TypeOfNewMobility <- 2
-  dataset[dataset$TypeOfNewMobility == "Other (Lime, BiciMAD, etc)",]$TypeOfNewMobility <- 3
+  dataset[dataset$TypeOfNewMobility == "I don't use any new mobility servises",]$TypeOfNewMobility <- "No"
+  dataset[dataset$TypeOfNewMobility == "Carsharing",]$TypeOfNewMobility <- "Car"
+  dataset[dataset$TypeOfNewMobility == "Motosharing",]$TypeOfNewMobility <- "Moto"
+  dataset[dataset$TypeOfNewMobility == "Other (Lime, BiciMAD, etc)",]$TypeOfNewMobility <- "Other"
   dataset$TypeOfNewMobility <- as.factor(dataset$TypeOfNewMobility)
   return(dataset)
 }
@@ -85,12 +86,12 @@ parseUsagePerMonth <- function(dataset) {
   dataset$UsagePerMonth[dataset$UsagePerMonth == "Todos los d\303\255as "] <- 30
   dataset$UsagePerMonth[dataset$UsagePerMonth == "20 times a week"] <- 30
   
-  dataset$UsagePerMonth[dataset$UsagePerMonth == "N/A"] <- "<NA>"
-  dataset$UsagePerMonth[dataset$UsagePerMonth == "-"] <- "<NA>"
-  dataset$UsagePerMonth[dataset$UsagePerMonth == ""] <- "<NA>"
-  dataset$UsagePerMonth[is.na(dataset$UsagePerMonth)] <- "<NA>"
+  dataset$UsagePerMonth[dataset$UsagePerMonth == "N/A"] <- NA
+  dataset$UsagePerMonth[dataset$UsagePerMonth == "-"] <- NA
+  dataset$UsagePerMonth[dataset$UsagePerMonth == ""] <- NA  
+  dataset$UsagePerMonth[is.na(dataset$UsagePerMonth)] <- NA
   
-  dataset$UsagePerMonth <- as.factor(dataset$UsagePerMonth)
+  dataset$UsagePerMonth <- as.numeric(dataset$UsagePerMonth)
   return(dataset)
 }
 
@@ -100,17 +101,142 @@ unique(newMobility$CostLastTrip)
 
 parseCost <- function(dataset) {
   dataset$CostLastTrip <- as.character(dataset$CostLastTrip)
-  dataset$CostLastTrip[dataset$CostLastTrip == "Don\342\200\231t remember it "] <- "<NA>"
-  dataset$CostLastTrip[dataset$CostLastTrip == "Don\342\200\231t remember"] <- "<NA>"
-  dataset$CostLastTrip[is.na(dataset$CostLastTrip)] <- "<NA>"
-  dataset$CostLastTrip[dataset$CostLastTrip == "Nothing"] <- "<NA>"
-  dataset$CostLastTrip[dataset$CostLastTrip == "No"] <- "<NA>"
-  dataset$CostLastTrip[dataset$CostLastTrip == ""] <- "<NA>"
-  dataset$CostLastTrip[dataset$CostLastTrip == "-"] <- "<NA>"
-  dataset$CostLastTrip <- as.factor(dataset$CostLastTrip)
+  dataset$CostLastTrip[dataset$CostLastTrip == "Don\342\200\231t remember it "] <- NA
+  dataset$CostLastTrip[dataset$CostLastTrip == "Don\342\200\231t remember"] <- NA
+  dataset$CostLastTrip[is.na(dataset$CostLastTrip)] <- NA
+  dataset$CostLastTrip[dataset$CostLastTrip == "Nothing"] <- NA
+  dataset$CostLastTrip[dataset$CostLastTrip == "No"] <- NA
+  dataset$CostLastTrip[dataset$CostLastTrip == ""] <- NA
+  dataset$CostLastTrip[dataset$CostLastTrip == "-"] <- NA
+  dataset$CostLastTrip <- as.numeric(dataset$CostLastTrip)
   return(dataset)
 }
 
 newMobility <- parseCost(newMobility)
-unique(newMobility$CostLastTrip)
+#unique(newMobility$CostLastTrip)
+#names(newMobility)
+
+timeOfDay <- function(init, end) {
+  init <- as.numeric(init)
+  end <- as.numeric(end)
+  result <- ""
+  if ((init >= 0) && (end <= 6)) {
+    # Early-Morning
+    result <- "Early-Morning"
+  } else if ((init >= 6) && (end <= 11)) {
+    # Morning
+    result <- "Morning"
+  } else if (init >= 11) {
+    # Afternoon
+    if (end <= 17) {
+      result <- "Afternoon"
+    } else if (end <= 24) {
+      result <- "Evening"
+    }
+  } else if (init >= 17) {
+    # Evening
+    if (end <= 21) {
+      result <- "Evening"
+    } else if ((end >= 21) && (end <= 24)) {
+      # Night
+      result <- "Night"
+    }
+  } else if ((init >= 21) && (end <= 24)) {
+    # Night
+    result <- "Night"
+  } else {
+    result <- "All day"
+  }
+  return(result)
+} 
+
+parseRangeOfHours <- function(dataset) {
+  ### Values:
+  # Early-Morning (00:00-6:00)
+  # Morning (6:00-11:00)
+  # Afternoon (12:00-17:00)
+  # Evening (18:00-21:00)
+  # Night (22:00-00:00)
+  dataset$HourRange <- dataset$RangeOfHours
+  dataset$HourRange <- as.character(dataset$HourRange)
+  for (value in dataset$RangeOfHours) {
+    dataset$RangeOfHours <- as.character(dataset$RangeOfHours)
+    if (!is.na(value) && (value != "NA") && (value != "N/A")) {
+      if (grepl("/", value)) {
+        aux <- strsplit(value, "/")
+        range1Init <- strsplit(strsplit(as.character(aux[[1]][1]), "-")[[1]][1], ":")[[1]][1]
+        range1End <- strsplit(strsplit(as.character(aux[[1]][1]), "-")[[1]][2], ":")[[1]][1]
+        range2Init <- strsplit(strsplit(as.character(aux[[1]][2]), "-")[[1]][1], ":")[[1]][1]
+        range2End <- strsplit(strsplit(as.character(aux[[1]][2]), "-")[[1]][2], ":")[[1]][1]
+
+        range1 <- timeOfDay(range1Init, range1End)
+        range2 <- timeOfDay(range2Init, range2End)
+        ranges <- paste(range1, range2, sep="/")
+        
+        dataset$HourRange[dataset$HourRange == value] <- ranges
+
+      } else if (grepl("-", value)) {
+        aux <- strsplit(value, "-")
+        rangeInit <- strsplit(as.character(aux[[1]][1]), ":")[[1]][1]
+        rangeEnd <- strsplit(as.character(aux[[1]][2]), ":")[[1]][1]
+        
+        range <- timeOfDay(rangeInit, rangeEnd)
+        
+        dataset$HourRange[dataset$HourRange == value] <- range
+      }
+    }
+  }
+  dataset$HourRange[dataset$HourRange == "Never"] <- NA
+  dataset$HourRange[dataset$HourRange == "Nunca"] <- NA
+  dataset$HourRange[dataset$HourRange == "N/A"] <- NA
+  dataset$HourRange[dataset$HourRange == "No one range"] <- NA
+  dataset$HourRange[is.na(dataset$HourRange)] <- NA
+  dataset$HourRange[dataset$HourRange == ""] <- NA
+  dataset$HourRange[dataset$HourRange == "Long trips"] <- "All day"
+  dataset$HourRange <- as.factor(dataset$HourRange)
+  return(dataset)
+}
+
+newMobility <- parseRangeOfHours(newMobility)
+
+parseRight <- function(dataset) {
+  dataset$RightSlowerVehicles <- as.character(dataset$RightSlowerVehicles)
+  dataset$RightSlowerVehicles[dataset$RightSlowerVehicles == ""] <- NA
+  dataset$RightSlowerVehicles <- as.factor(dataset$RightSlowerVehicles)
+  return(dataset)
+}
+
+newMobility <- parseRight(newMobility)
+
+## Variable Clasification
+# DriversLicense -> Categorical/Qualitative Nominal
+# VehicleInProperty -> Categorical/Qualitative Nominal
+# UsesNewMobility -> Categorical/Qualitative Nominal
+# TypeOfNewMobility -> Categorical/Qualitative Nominal
+# UsagePerMonth -> Numerical Continuous
+# UsageTime -> Categorical/Qualitative Ordinal
+# RangeOfHours/HourRange -> Categorical/Qualitative Nominal
+# CostLastTrip -> Numerical Continuous
+# RightSlowerVehicles -> Categorical/Qualitative Nominal
+##
+
+describeQualitative <- function(qualitative) {
+  print('Table: ')
+  print(table(qualitative))
+  print('Size: ') 
+  print(sum(table(qualitative)))
+  print('Frequency table: ')
+  print(table(qualitative)/sum(table(qualitative)))
+  barplot(table(qualitative))
+}
+
 names(newMobility)
+
+describeQualitative(newMobility$DriversLicense)
+describeQualitative(newMobility$VehicleInProperty)
+describeQualitative(newMobility$UseNewMobility)
+describeQualitative(newMobility$TypeOfNewMobility)
+describeQualitative(newMobility$HourRange)
+describeQualitative(newMobility$RightSlowerVehicles)
+describeQualitative(newMobility$UsageTime)
+
