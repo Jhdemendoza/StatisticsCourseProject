@@ -3,7 +3,6 @@ setwd("/Users/Jaime/Desktop/Master/Statistics fot Data Analysis/CourseProject/Da
 #realNames = c("License", "VehicleInProperty", "UseOfNewMobility", "KindOfNewMobility", "RangeOfHours", "LastTripDuration", "LastTripCost", "SlowVehiclesInRoad")
 
 newMobility = read.csv("NewMobility.csv", sep=";", dec=",")#, col.names = realNames)
-attach(newMobility)
 
 parseUsageTime <- function(dataset){
   dataset$UsageTime <- dataset$X5Min
@@ -207,25 +206,25 @@ parseRight <- function(dataset) {
 }
 
 newMobility <- parseRight(newMobility)
-
+attach(newMobility)
 ## Variable Clasification
 # DriversLicense -> Categorical/Qualitative Nominal
 # VehicleInProperty -> Categorical/Qualitative Nominal
 # UsesNewMobility -> Categorical/Qualitative Nominal
 # TypeOfNewMobility -> Categorical/Qualitative Nominal
 # UsagePerMonth -> Numerical Continuous
-# UsageTime -> Categorical/Qualitative Ordinal
+# UsageTime -> Numerical Discrete
 # RangeOfHours/HourRange -> Categorical/Qualitative Nominal
 # CostLastTrip -> Numerical Continuous
 # RightSlowerVehicles -> Categorical/Qualitative Nominal
 ##
 
 describeQualitative <- function(qualitative) {
-  print('Table: ')
+  print('Absolute Frequency Table: ')
   print(table(qualitative))
   print('Size: ') 
   print(sum(table(qualitative)))
-  print('Frequency table: ')
+  print('Relative Frequency table: ')
   print(table(qualitative)/sum(table(qualitative)))
   barplot(table(qualitative))
 }
@@ -238,5 +237,40 @@ describeQualitative(newMobility$UseNewMobility)
 describeQualitative(newMobility$TypeOfNewMobility)
 describeQualitative(newMobility$HourRange)
 describeQualitative(newMobility$RightSlowerVehicles)
-describeQualitative(newMobility$UsageTime)
+
+describeDiscrete <- function(discrete) {
+  print('Absolut Frequency Table: ')
+  print(table(discrete))
+  print('Size: ')
+  print(sum(table(discrete)))
+  print('Relative Frequency Table: ')
+  print(table(discrete)/sum(table(discrete)))
+  print('ECDF: ')
+  plot(ecdf(discrete))
+}
+
+describeDiscrete(newMobility$UsageTime)
+
+describeContinuous <- function(continuous) {
+  print('Absolute frequency histogram: ')
+  hist(continuous)
+  print('Absolute frequency: ')
+  print(hist(continuous)$counts)
+  print('Relative frequency: ')
+  print(hist(continuous)$counts/sum(table(continuous)))
+  print('ECDF: ')
+  plot(ecdf(continuous))
+}
+
+describeContinuous(newMobility$CostLastTrip)
+
+locationMeasures <- function(data) {
+  print('Mean: ')
+  print(mean(data))
+  print('Median: ')
+  print(median(data))
+}
+
+locationMeasures(CostLastTrip)
+locationMeasures(UsageTime)
 
