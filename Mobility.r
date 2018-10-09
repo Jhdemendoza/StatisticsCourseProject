@@ -312,7 +312,7 @@ dispersionMeasures <- function(data) {
 dispersionMeasures(CostLastTrip)
 dispersionMeasures(UsageTime)
 
-## Both Qualitative Pairs
+## Both Qualitative Analysis
 # DriversLicense vs VehicleInProperty
 # DriversLicense vs UseNewMobility
 # DriversLicense vs TypeOfNewMobility
@@ -329,6 +329,7 @@ dispersionMeasures(UsageTime)
 # TypeOfNewMobility vs HourRange
 # RightSlowerVehicles vs HourRange
 
+## TODO: Add Group bar plots
 bothQualitative <- function(qual1, qual2, name1, name2) {
   n <- 1
   if (sum(table(qual1)) == sum(table(qual2))) {
@@ -365,4 +366,9 @@ bothQualitative(UseNewMobility, HourRange, "UseNewMobility", "HourRange")
 bothQualitative(TypeOfNewMobility, RightSlowerVehicles, "TypeOfNewMobility", "RightSlowerVehicles")
 # This table is too big to show anything
 bothQualitative(TypeOfNewMobility, HourRange, "TypeOfNewMobility", "HourRange")
+
+#### Conditional Frequency Tables?? We've have to think which ones are of interest
+
+## One qualitative, one quantitative --> Box plots, Histograms and Summary Statistics conditioning
+# on the different values of the qualitative variable
 
