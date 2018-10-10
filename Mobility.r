@@ -411,10 +411,10 @@ oneQoneQ(DriversLicense, UsageTime, 'DriversLicense', 'UsageTime')
 # UsageTime (Who uses it more time?)
 
 ## Somehow there's someone that doesn't use new mobility services but has spent some money... !!!!
-oneQoneQ(TypeOfNewMobility, CostLastTrip, 'TypeOfNewMobility', 'CostLastTrip')
+oneQoneQ(TypeOfNewMobility[TypeOfNewMobility != "No"], CostLastTrip[TypeOfNewMobility != "No"], 'TypeOfNewMobility', 'CostLastTrip')
 ## Probably too much people who uses a car has said that their last trip was 0 euros...
-oneQoneQ(TypeOfNewMobility, UsagePerMonth, 'TypeOfNewMobility', 'UsagePerMonth')
-oneQoneQ(TypeOfNewMobility, UsageTime, 'TypeOfNewMobility', 'UsageTime')
+oneQoneQ(TypeOfNewMobility[TypeOfNewMobility != "No"], UsagePerMonth[TypeOfNewMobility != "No"], 'TypeOfNewMobility', 'UsagePerMonth')
+oneQoneQ(TypeOfNewMobility[TypeOfNewMobility != "No"], UsageTime[TypeOfNewMobility != "No"], 'TypeOfNewMobility', 'UsageTime')
 
 ## Given VehicleInProperty:
 # CostLastTrip (Who spends more?) 
