@@ -7,10 +7,10 @@ newMobility = read.csv("NewMobility.csv", sep=";", dec=",")#, col.names = realNa
 parseUsageTime <- function(dataset){
   dataset$UsageTime <- dataset$X5Min
   dataset$UsageTime <- as.character(dataset$UsageTime)
-  dataset[dataset$UsageTime == "Column 1",]$UsageTime <- as.numeric(5,0)
-  dataset[dataset$X10Min == "Column 1",]$UsageTime <- as.numeric(10,0)
-  dataset[dataset$X15Min == "Column 1",]$UsageTime <- as.numeric(15,0)
-  dataset[dataset$X20Min == "Column 1",]$UsageTime <- as.numeric(20,0)
+  dataset[dataset$UsageTime == "Column 1",]$UsageTime <- as.numeric(5.0)
+  dataset[dataset$X10Min == "Column 1",]$UsageTime <- as.numeric(10.0)
+  dataset[dataset$X15Min == "Column 1",]$UsageTime <- as.numeric(15.0)
+  dataset[dataset$X20Min == "Column 1",]$UsageTime <- as.numeric(20.0)
   dataset[dataset$X.20Min == "Column 1",]$UsageTime <- as.numeric(21.0)
   dataset$UsageTime[dataset$UsageTime == ""] <- NA
   dataset$X5Min <- NULL
@@ -32,7 +32,7 @@ parseTypeOfNewMobility <- function(dataset) {
   # Moto -> 'Motorsharing'
   # Other -> 'Other (Lime, BiciMAD, etc)'
   dataset$TypeOfNewMobility <- as.character(dataset$TypeOfNewMobility)
-  dataset[dataset$TypeOfNewMobility == "",]$TypeOfNewMobility <- "I don't use any new mobility servises"
+  dataset[dataset$TypeOfNewMobility == "",]$TypeOfNewMobility <- "No"
   dataset[dataset$TypeOfNewMobility == "I don't use any new mobility servises",]$TypeOfNewMobility <- "No"
   dataset[dataset$TypeOfNewMobility == "Carsharing",]$TypeOfNewMobility <- "Car"
   dataset[dataset$TypeOfNewMobility == "Motosharing",]$TypeOfNewMobility <- "Moto"
@@ -207,6 +207,7 @@ parseRight <- function(dataset) {
 
 newMobility <- parseRight(newMobility)
 attach(newMobility)
+#######################################################
 ## Variable Clasification
 # DriversLicense -> Categorical/Qualitative Nominal
 # VehicleInProperty -> Categorical/Qualitative Nominal
@@ -219,98 +220,101 @@ attach(newMobility)
 # RightSlowerVehicles -> Categorical/Qualitative Nominal
 ##
 
-describeQualitative <- function(qualitative) {
-  print('Absolute Frequency Table: ')
+describeQualitative <- function(qualitative, name) {
+  print(paste(name, 'Absolute Frequency Table: '))
   print(table(qualitative))
-  print('Size: ') 
+  print(paste(name, 'Size: ')) 
   print(sum(table(qualitative)))
-  print('Relative Frequency table: ')
+  print(paste(name, 'Relative Frequency table: '))
   print(table(qualitative)/sum(table(qualitative)))
-  barplot(table(qualitative))
+  barplot(table(qualitative), main=name)
 }
 
 names(newMobility)
 
-describeQualitative(newMobility$DriversLicense)
-describeQualitative(newMobility$VehicleInProperty)
-describeQualitative(newMobility$UseNewMobility)
-describeQualitative(newMobility$TypeOfNewMobility)
-describeQualitative(newMobility$HourRange)
-describeQualitative(newMobility$RightSlowerVehicles)
+describeQualitative(DriversLicense, "DriversLicense")
+describeQualitative(VehicleInProperty, "VehicleInProperty")
+describeQualitative(UseNewMobility, "UseNewMobility")
+describeQualitative(TypeOfNewMobility, "TypeOfNewMobility")
+describeQualitative(HourRange, "HourRange")
+describeQualitative(RightSlowerVehicles, "RightSlowerVehicles")
 
-describeDiscrete <- function(discrete) {
-  print('Absolut Frequency Table: ')
+describeDiscrete <- function(discrete, name) {
+  print(paste(name, 'Absolut Frequency Table: '))
   print(table(discrete))
-  print('Size: ')
+  print(paste(name, 'Size: '))
   print(sum(table(discrete)))
-  print('Relative Frequency Table: ')
+  print(paste(name, 'Relative Frequency Table: '))
   print(table(discrete)/sum(table(discrete)))
-  print('ECDF: ')
-  plot(ecdf(discrete))
+  print(paste(name, 'ECDF: '))
+  plot(ecdf(discrete), main=name)
 }
 
-describeDiscrete(newMobility$UsageTime)
+describeDiscrete(UsageTime, "UsageTime")
 
-describeContinuous <- function(continuous) {
-  print('Absolute frequency histogram: ')
-  hist(continuous)
-  print('Absolute frequency: ')
-  print(hist(continuous)$counts)
+describeContinuous <- function(continuous, name) {
+  print(paste(name, 'Absolute frequency histogram: '))
+  auxHist <- hist(continuous, xlab = name)
+  print(paste(name, 'Absolute frequency: '))
+  print(auxHist$counts)
   print('Relative frequency: ')
-  print(hist(continuous)$counts/sum(table(continuous)))
-  print('ECDF: ')
-  plot(ecdf(continuous))
+  print(auxHist$counts/sum(table(continuous)))
+  print(paste(name, 'ECDF: '))
+  plot(ecdf(continuous), main=name)
 }
 
-describeContinuous(newMobility$CostLastTrip)
+describeContinuous(CostLastTrip, "CostLastTrip")
+describeContinuous(UsagePerMonth, "UsagePerMonth")
 
-locationMeasures <- function(data) {
-  print('Mean: ')
-  print(mean(table(data)))
-  print('Median: ')
-  print(median(table(data)))
-  print('First Quartile: ')
-  Q1 <- quantile(table(data), probs = 0.25)
+locationMeasures <- function(data, name) {
+  print(paste(name, 'Mean: '))
+  print(mean(data, na.rm=TRUE))
+  print(paste(name, 'Median: '))
+  print(median(data, na.rm=TRUE))
+  print(paste(name, 'First Quartile: '))
+  Q1 <- quantile(data, na.rm=TRUE, probs = 0.25)
   print(Q1)
-  print('Third Quartile: ')
-  Q3 <- quantile(table(data), probs = 0.75)
+  print(paste(name, 'Third Quartile: '))
+  Q3 <- quantile(data, na.rm=TRUE, probs = 0.75)
   print(Q3)
-  print('InterQuartile Range: ')
+  print(paste(name, 'InterQuartile Range: '))
   IQR <- Q3-Q1
   print(IQR)
-  print('Outliers below: ')
+  print(paste(name, 'Outliers below: '))
   print(Q1-1.5*IQR)
-  print('Outliers above: ')
+  print(paste(name, 'Outliers above: '))
   print(Q3+1.5*IQR)
-  boxplot(data)
+  boxplot(data, main=name)
 }
 
-locationMeasures(CostLastTrip)
-locationMeasures(UsageTime)
+locationMeasures(CostLastTrip, "CostLastTrip")
+locationMeasures(UsageTime, "UsageTime")
 
 library(e1071)
 
-dispersionMeasures <- function(data) {
-  data <- table(data)
-  print('Variance: ')
-  print(var(data))
-  print('Standard deviation: ')
-  print(sd(data))
-  print('Sample median absolute deviation: ')
-  print(mad(data))
-  print('Coefficient of variation: ')
-  print(sd(data)/mean(data))
-  print('Skewness coeff: ')
-  print(skewness(data))
-  if (skewness(data) < 0) {
-    print('Left skewness')
-  } else if (skewness(data) > 0) {
-    print('Right skewness')
+dispersionMeasures <- function(data, name) {
+  #print(data)
+  print(paste(name, 'Variance: '))
+  print(var(data, na.rm=TRUE))
+  print(paste(name, 'Standard deviation: '))
+  print(sd(data, na.rm=TRUE))
+  print(paste(name, 'Sample median absolute deviation: '))
+  print(mad(data, na.rm=TRUE))
+  print(paste(name, 'Coefficient of variation: '))
+  print(sd(data, na.rm=TRUE)/mean(data, na.rm=TRUE))
+  print(paste(name, 'Skewness coeff: '))
+  print(skewness(data, na.rm = TRUE))
+  if (!is.nan(skewness(data, na.rm = TRUE))) {
+    if (skewness(data, na.rm = TRUE) < 0) {
+      print('Left skewness')
+    } else if (skewness(data, na.rm = TRUE) > 0) {
+      print('Right skewness')
+    }
   }
 }
 
-dispersionMeasures(CostLastTrip)
-dispersionMeasures(UsageTime)
+dispersionMeasures(CostLastTrip, "CostLastTrip")
+dispersionMeasures(UsageTime, "UsageTime")
 
 ## Both Qualitative Analysis
 # DriversLicense vs VehicleInProperty
@@ -344,13 +348,15 @@ bothQualitative <- function(qual1, qual2, name1, name2) {
   print(tableAux)
   print(paste('Joint Relative Frequency for', name1, 'and', name2, ': '))
   print(tableAux/n)
-  barplot(tableAux, beside=TRUE, legend = rownames(tableAux), xlab=name2)
+  barplot(tableAux, beside=TRUE, legend = rownames(tableAux), ylab=name1, xlab=name2)
 }
 
 bothQualitative(DriversLicense, VehicleInProperty, "DriversLicense", "VehicleInProperty")
 bothQualitative(DriversLicense, UseNewMobility, "DriversLicense", "UseNewMobility")
+# There are people that drive a car not having a drivers license somehow...
 bothQualitative(DriversLicense, TypeOfNewMobility, "DriversLicense", "TypeOfNewMobility")
 bothQualitative(DriversLicense, RightSlowerVehicles, "DriversLicense", "RightSlowerVehicles")
+##bothQualitative(RightSlowerVehicles, DriversLicense, "RightSlowerVehicles", "DriversLicense")
 # This one doesn't really represent anything...
 bothQualitative(DriversLicense, HourRange, "DriversLicense", "HourRange")
 bothQualitative(VehicleInProperty, UseNewMobility, "VehicleInProperty", "UseNewMobility")
@@ -363,7 +369,7 @@ bothQualitative(VehicleInProperty, HourRange, "VehicleInProperty", "HourRange")
 bothQualitative(UseNewMobility, TypeOfNewMobility, "UseNewMobility", "TypeOfNewMobility")
 bothQualitative(UseNewMobility, RightSlowerVehicles, "UseNewMobility", "RightSlowerVehicles")
 # This one doesn't really represent anything, since only cares about people who use new mobility
-bothQualitative(UseNewMobility, HourRange, "UseNewMobility", "HourRange")
+bothQualitative(UseNewMobility, HourRange, "UseNewMobility", "HourRange") #### Delete
 # Doesn't make sense to me... why would there be people that use bikes and mopads and think that they shouldn't go in the road?
 bothQualitative(TypeOfNewMobility, RightSlowerVehicles, "TypeOfNewMobility", "RightSlowerVehicles")
 # This table is too big to show anything
@@ -374,6 +380,20 @@ bothQualitative(TypeOfNewMobility, HourRange, "TypeOfNewMobility", "HourRange")
 ## One qualitative, one quantitative --> Box plots, Histograms and Summary Statistics conditioning
 # on the different values of the qualitative variable
 
+oneQoneQ <- function(qual, quan, name1, name2) {
+  boxplot(quan ~ qual, xlab=name1, ylab=name2)
+  for (uniq in unique(qual)) {
+    if (!is.na(uniq)) {
+      print(paste(name1, uniq, name2))
+      print(length(quan[qual==uniq]))
+      hist(quan[qual==uniq], main=paste(name1, uniq), xlab=name2)
+      describeContinuous(quan[qual==uniq], paste(name1,'==',uniq,name2))
+      locationMeasures(quan[qual==uniq], paste(name1,'==',uniq,name2))
+      dispersionMeasures(quan[qual==uniq], paste(name1,'==',uniq,name2))
+    }
+  }
+}
+
 ### The following analysis are considering only people who use new mobility services!!!
 
 ## Given DriversLicense (Yes/No): 
@@ -381,17 +401,31 @@ bothQualitative(TypeOfNewMobility, HourRange, "TypeOfNewMobility", "HourRange")
 # UsagePerMonth (Who uses it more often?)
 # UsageTime (Who uses it more time?)
 
+oneQoneQ(DriversLicense, CostLastTrip, 'DriversLicense', 'CostLastTrip')
+oneQoneQ(DriversLicense, UsagePerMonth, 'DriversLicense', 'UsagePerMonth')
+oneQoneQ(DriversLicense, UsageTime, 'DriversLicense', 'UsageTime')
+
 ## Given TypesOfNewMobility != 'I don't use any': [car vs motorbike vs bike/mopad]
 # CostLastTrip (Who spends more?) 
 # UsagePerMonth (Who uses it more often?)
 # UsageTime (Who uses it more time?)
+
+## Somehow there's someone that doesn't use new mobility services but has spent some money... !!!!
+oneQoneQ(TypeOfNewMobility, CostLastTrip, 'TypeOfNewMobility', 'CostLastTrip')
+## Probably too much people who uses a car has said that their last trip was 0 euros...
+oneQoneQ(TypeOfNewMobility, UsagePerMonth, 'TypeOfNewMobility', 'UsagePerMonth')
+oneQoneQ(TypeOfNewMobility, UsageTime, 'TypeOfNewMobility', 'UsageTime')
 
 ## Given VehicleInProperty:
 # CostLastTrip (Who spends more?) 
 # UsagePerMonth (Who uses it more often?)
 # UsageTime (Who uses it more time?)
 
-## Given HourRange: (this one could be a problem since there are not enough samples)
+oneQoneQ(VehicleInProperty, CostLastTrip, 'VehicleInProperty', 'CostLastTrip')
+oneQoneQ(VehicleInProperty, UsagePerMonth, 'VehicleInProperty', 'UsagePerMonth')
+oneQoneQ(VehicleInProperty, UsageTime, 'VehicleInProperty', 'UsageTime')
+
+## Given HourRange: (this one could be a problem since there are NOT ENOUGH SAMPLES)
 # CostLastTrip (Who spends more?) 
 # UsagePerMonth (Who uses it more often?)
 # UsageTime (Who uses it more time?)
@@ -401,8 +435,26 @@ bothQualitative(TypeOfNewMobility, HourRange, "TypeOfNewMobility", "HourRange")
 # UsagePerMonth (Who uses it more often?)
 # UsageTime (Who uses it more time?)
 
-### Both Quantitative
+oneQoneQ(RightSlowerVehicles, CostLastTrip, 'RightSlowerVehicles', 'CostLastTrip')
+oneQoneQ(RightSlowerVehicles, UsagePerMonth, 'RightSlowerVehicles', 'UsagePerMonth')
+oneQoneQ(RightSlowerVehicles, UsageTime, 'RightSlowerVehicles', 'UsageTime')
+
+### Both Quantitative 
+##### There's a problem when analyzing thow quantitative variables which is that 
+##### covariance and correlation can't be properly calculated because there are 
+##### two many NA in this variables...
 # Sample covariance
 # Sample correlation
 # Scatter plots
+### CostLastTrip vs UsageTime vs UsagePerMonth
+
+bothQuantitative <- function(quan1, quan2, name1, name2) {
+  plot(quan1, quan2, xlab = name1, ylab = name2)
+}
+
+bothQuantitative(CostLastTrip, UsagePerMonth, 'CostLastTrip', 'UsagePerMonth')
+bothQuantitative(CostLastTrip, UsageTime, 'CostLastTrip', 'UsageTime')
+bothQuantitative(UsagePerMonth, UsageTime, 'UsagePerMonth', 'UsageTime')
+
+
 
