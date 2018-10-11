@@ -255,6 +255,8 @@ describeDiscrete(UsageTime, "UsageTime")
 describeContinuous <- function(continuous, name) {
   print(paste(name, 'Absolute frequency histogram: '))
   auxHist <- hist(continuous, xlab = name)
+  print('Size: ')
+  print(sum(table(continuous)))
   print(paste(name, 'Absolute frequency: '))
   print(auxHist$counts)
   print('Relative frequency: ')
