@@ -2,12 +2,12 @@ setwd("/Users/Jaime/Desktop/Master/Statistics fot Data Analysis/CourseProject/Da
 
 #realNames = c("License", "VehicleInProperty", "UseOfNewMobility", "KindOfNewMobility", "RangeOfHours", "LastTripDuration", "LastTripCost", "SlowVehiclesInRoad")
 
-newMobility = read.csv("NewMobility.csv", sep=";", dec=",")#, col.names = realNames)
-
+newMobility = read.csv("NewMobility_v2.csv", sep=";", dec=",")#, col.names = realNames)
+attach(newMobility)
 parseUsageTime <- function(dataset){
   dataset$UsageTime <- dataset$X5Min
   dataset$UsageTime <- as.character(dataset$UsageTime)
-  dataset[dataset$UsageTime == "Column 1",]$UsageTime <- as.numeric(5.0)
+  #dataset[dataset$X5Min == "Column 1",]$UsageTime <- as.numeric(5.0)
   dataset[dataset$X10Min == "Column 1",]$UsageTime <- as.numeric(10.0)
   dataset[dataset$X15Min == "Column 1",]$UsageTime <- as.numeric(15.0)
   dataset[dataset$X20Min == "Column 1",]$UsageTime <- as.numeric(20.0)
@@ -32,8 +32,8 @@ parseTypeOfNewMobility <- function(dataset) {
   # Moto -> 'Motorsharing'
   # Other -> 'Other (Lime, BiciMAD, etc)'
   dataset$TypeOfNewMobility <- as.character(dataset$TypeOfNewMobility)
-  dataset[dataset$TypeOfNewMobility == "",]$TypeOfNewMobility <- "No"
-  dataset[dataset$TypeOfNewMobility == "I don't use any new mobility servises",]$TypeOfNewMobility <- "No"
+  #dataset[dataset$TypeOfNewMobility == "",]$TypeOfNewMobility <- "No"
+  dataset[dataset$TypeOfNewMobility == "I don't use any new mobility services",]$TypeOfNewMobility <- "No"
   dataset[dataset$TypeOfNewMobility == "Carsharing",]$TypeOfNewMobility <- "Car"
   dataset[dataset$TypeOfNewMobility == "Motosharing",]$TypeOfNewMobility <- "Moto"
   dataset[dataset$TypeOfNewMobility == "Other (Lime, BiciMAD, etc)",]$TypeOfNewMobility <- "Other"
@@ -42,7 +42,7 @@ parseTypeOfNewMobility <- function(dataset) {
 }
 
 newMobility <- parseTypeOfNewMobility(newMobility)
-
+attach(newMobility)
 parseUsagePerMonth <- function(dataset) {
   dataset$UsagePerMonth <- as.character(dataset$UsagePerMonth)
   dataset$UsagePerMonth[dataset$UsagePerMonth == "Never"] <- 0
@@ -107,7 +107,8 @@ parseCost <- function(dataset) {
   dataset$CostLastTrip[dataset$CostLastTrip == "No"] <- NA
   dataset$CostLastTrip[dataset$CostLastTrip == ""] <- NA
   dataset$CostLastTrip[dataset$CostLastTrip == "-"] <- NA
-  dataset$CostLastTrip <- as.numeric(dataset$CostLastTrip)
+  print(dataset$CostLastTrip)
+  dataset$CostLastTrip <- as.numeric(sub(",", ".",dataset$CostLastTrip))
   return(dataset)
 }
 
@@ -247,7 +248,8 @@ describeDiscrete <- function(discrete, name) {
   print(paste(name, 'Relative Frequency Table: '))
   print(table(discrete)/sum(table(discrete)))
   print(paste(name, 'ECDF: '))
-  plot(ecdf(discrete), main=name)
+  plot(ecdf(discrete), main=name, col="#00146E", xlab = "Time (min)", ylab="Fn(Time)")
+  hist(discrete, main=name, col="#00146E", xlab="Time Range", ylab="Frequency", breaks = 4)
 }
 
 describeDiscrete(UsageTime, "UsageTime")
@@ -262,7 +264,7 @@ describeContinuous <- function(continuous, name) {
   print('Relative frequency: ')
   print(auxHist$counts/sum(table(continuous)))
   print(paste(name, 'ECDF: '))
-  plot(ecdf(continuous), main=name)
+  plot(ecdf(continuous), main=name, xlab='Number of Times', ylab='Fn(Number of Times)', col = "#00146E")
 }
 
 describeContinuous(CostLastTrip, "CostLastTrip")
@@ -290,7 +292,7 @@ locationMeasures <- function(data, name) {
 }
 
 locationMeasures(CostLastTrip, "CostLastTrip")
-locationMeasures(UsageTime, "UsageTime")
+locationMeasures(UsagePerMonth, "UsagePerMonth")
 
 library(e1071)
 
@@ -350,7 +352,11 @@ bothQualitative <- function(qual1, qual2, name1, name2) {
   print(tableAux)
   print(paste('Joint Relative Frequency for', name1, 'and', name2, ': '))
   print(tableAux/n)
-  barplot(tableAux, beside=TRUE, legend = rownames(tableAux), ylab=name1, xlab=name2)
+  barplot(tableAux, beside=TRUE, legend = rownames(tableAux), ylab='Frequency', xlab=name2, args.legend=list(
+    x=ncol(tableAux) + 4.5,
+    y=max(colSums(tableAux))-20,
+    bty = "n"
+  ), col = c("#00146E", "#00249B", "#0029AF", "#0030CE"), main=paste(name1, 'VS', name2))
 }
 
 bothQualitative(DriversLicense, VehicleInProperty, "DriversLicense", "VehicleInProperty")
@@ -383,7 +389,7 @@ bothQualitative(TypeOfNewMobility, HourRange, "TypeOfNewMobility", "HourRange")
 # on the different values of the qualitative variable
 
 oneQoneQ <- function(qual, quan, name1, name2) {
-  boxplot(quan ~ qual, xlab=name1, ylab=name2)
+  boxplot(quan ~ qual, xlab=name1, ylab=name2, col="#00146E", main=paste(name1, 'vs', name2))
   for (uniq in unique(qual)) {
     if (!is.na(uniq)) {
       print(paste(name1, uniq, name2))
@@ -454,9 +460,151 @@ bothQuantitative <- function(quan1, quan2, name1, name2) {
   plot(quan1, quan2, xlab = name1, ylab = name2)
 }
 
-bothQuantitative(CostLastTrip, UsagePerMonth, 'CostLastTrip', 'UsagePerMonth')
-bothQuantitative(CostLastTrip, UsageTime, 'CostLastTrip', 'UsageTime')
+bothQuantitative(UsagePerMonth, CostLastTrip, 'UsagePerMonth', 'CostLastTrip')
+bothQuantitative(UsageTime, CostLastTrip, 'UsageTime', 'CostLastTrip')
 bothQuantitative(UsagePerMonth, UsageTime, 'UsagePerMonth', 'UsageTime')
+
+### TODO:
+# Mirar AIC Test
+# Razonar por que MLE es "mejor" que MME
+# Como tenemos un sample size grande, utilizamos el CLT (Central Limit Theorem) para la inferencia
+library(fitdistrplus)
+
+## CostLastTrip > Probability Density Function Fit
+# Exponential Method of Moments
+fitExp = fitdist(CostLastTrip[!is.na(CostLastTrip)],"exp",method="mme")
+hist(CostLastTrip[!is.na(CostLastTrip)], freq = F, ylim = c(0,0.12))#, nclass = 3)
+grid=seq(0,30,0.012)
+lines(grid,dexp(grid,fitExp$estimate[1]),col="red")
+## We should be using for the gamm distribution the maximum likelihood method
+############
+# Gamma Method of Moments
+fitGamma = fitdist(CostLastTrip[!is.na(CostLastTrip)],"gamma",method = "mme")
+lines(grid,dgamma(grid,fitGamma$estimate[1],fitGamma$estimate[2]),col="blue")
+# Gamma Maximum Likelihood Estimation Method
+fitGammaMle = fitdist(CostLastTrip[!is.na(CostLastTrip)],"gamma",method="mle")
+lines(grid,dgamma(grid,fitGammaMle$estimate[1],fitGammaMle$estimate[2]),col="green")
+## AIC
+
+
+## CostLastTrip > Distribution Function graphs
+# Empirical
+plot(ecdf(CostLastTrip[!is.na(CostLastTrip)]))
+# Exponential
+lines(grid,pexp(grid,fitExp$estimate[1]),col="red")
+# Gamma Method of Moments
+lines(grid,pgamma(grid,fitGamma$estimate[1],fitGamma$estimate[2]),col="blue")
+# Gamma Maximum Likelihood Estimation Method
+lines(grid,pgamma(grid,fitGammaMle$estimate[1],fitGammaMle$estimate[2]),col="green")
+## AIC
+
+
+UsagePerMonthAux <- UsagePerMonth[UsagePerMonth!=0.0&!is.na(UsagePerMonth)]
+## UsagePerMonth > Probability Density Function Fit
+hist(UsagePerMonthAux, freq = F, ylim = c(0,0.2))
+# Exponential by Method of Moments
+fitExp2 = fitdist(UsagePerMonthAux,"exp",method = "mme")
+grid2 = seq(0,30,0.01)
+lines(grid,dexp(grid,fitExp2$estimate[1]),col="red")
+# Gamma by Maximum Likelihood Estimation Method
+fitGamma2 = fitdist(UsagePerMonthAux,"gamma",method="mle")
+lines(grid,dgamma(grid,fitGamma2$estimate[1],fitGamma2$estimate[2]),col="blue")
+## AIC
+
+
+hist(UsagePerMonthAux[UsagePerMonthAux < 15], freq = F, ylim=c(0,0.4))
+fitExp3 = fitdist(UsagePerMonthAux[UsagePerMonthAux < 15],"exp",method="mme")
+grid3 = seq(0,15,0.01)
+lines(grid3,dexp(grid3,fitExp3$estimate[1]),col="red")
+fitGamma3 = fitdist(UsagePerMonthAux[UsagePerMonthAux < 15], "gamma", method = "mle")
+lines(grid3,dgamma(grid3,fitGamma3$estimate[1],fitGamma3$estimate[2]), col="blue")
+fitGamma3MME = fitdist(UsagePerMonthAux[UsagePerMonthAux < 15], "gamma", method = "mme")
+lines(grid3,dgamma(grid3,fitGamma3MME$estimate[1],fitGamma3MME$estimate[2]), col="green")
+## AIC
+
+
+plot(ecdf(UsagePerMonthAux))
+lines(grid2,pexp(grid2,fitExp2$estimate[1]),col="red")
+lines(grid2,pgamma(grid2,fitGamma2$estimate[1],fitGamma2$estimate[2]),col="blue")
+
+plot(ecdf(UsagePerMonthAux[UsagePerMonthAux < 15]))
+lines(grid3,pexp(grid3,fitExp3$estimate[1]),col="red")
+lines(grid3,pgamma(grid3,fitGamma3$estimate[1],fitGamma3$estimate[2]),col="blue")
+
+
+t.test(CostLastTrip[!is.na(CostLastTrip)])
+costMeanExample = 4.25
+# Hemos obtenido este valor de la meadia de una noticia en Internet que decia que estaba entre 3,5 y 5 el gasto
+t.test(CostLastTrip[!is.na(CostLastTrip)], mu = costMeanExample, alternative="g")
+# Since p is very small we can reject H0, and therefore we know H1 is true (The mean is greater than the one in the article).
+
+
+
+names(newMobility)
+table(TypeOfNewMobility,RightSlowerVehicles)
+table(TypeOfNewMobility,RightSlowerVehicles)/126
+chisq.test(TypeOfNewMobility,RightSlowerVehicles)
+# We can't reject H0 (b/c p-value > 0.05) => We know nothing
+chisq.test(TypeOfNewMobility,RightSlowerVehicles)$observed
+# Si las variables fuesen independientes, tendrian estos valores
+chisq.test(TypeOfNewMobility,RightSlowerVehicles)$expected
+
+Chi = chisq.test(TypeOfNewMobility,RightSlowerVehicles)$statistic
+N = 126
+V = sqrt(Chi/N)
+# As expected V is not close to one and therefore the variables do not have a strong dependency
+V
+
+table(VehicleInProperty,RightSlowerVehicles)
+chisq.test(VehicleInProperty,RightSlowerVehicles)
+# This p-value is small and therefore we can reject H0 (Y1 and Y2 being independent) => H1 is true = (Y1 and Y2 are dependent)
+chisq.test(VehicleInProperty,RightSlowerVehicles)$observed
+chisq.test(VehicleInProperty,RightSlowerVehicles)$expected
+Chi2 = chisq.test(VehicleInProperty,RightSlowerVehicles)$statistic
+V2 = sqrt(Chi2/N)
+# Since V Coefficient is not close to one, this means that the variable dependency is NOT strong
+# F(X,Y) = F(X)F(Y)
+### H0 -> Independientes => F(X,Y) = F(X)F(Y)
+### H1 -> Dependientes
+V2
+
+table(TypeOfNewMobility,UseNewMobility)
+chisq.test(TypeOfNewMobility,UseNewMobility)
+chisq.test(TypeOfNewMobility,UseNewMobility)$expected
+Chi3 = chisq.test(TypeOfNewMobility,UseNewMobility)$statistic
+N = 134
+V3 = sqrt(Chi3/N)
+V3
+
+
+names(newMobility)
+## RightSlowerVehicles does NOT matter when looking at Costs
+Y1 = CostLastTrip[RightSlowerVehicles=="Yes"]
+Y2 = CostLastTrip[RightSlowerVehicles=="No"]
+boxplot(log(Y1),log(Y2))
+#t.test(Y1,Y2,var.equal = T, alternative = "g")
+t.test(log(Y1),log(Y2),var.equal = F, alternative = "l")
+
+YCars = CostLastTrip[TypeOfNewMobility=="Car"]
+YNotCar = c(CostLastTrip[TypeOfNewMobility=="Moto"], CostLastTrip[TypeOfNewMobility=="Other"])
+boxplot(log(YCars),log(YNotCar))
+t.test(log(YCars),log(YNotCar),var.equal = F, alternative = "g")
+# If instead of using a confidence interval of 0.95 we were to use a confidence interval of 0.92, we could reject H0 (mu0 = mu1) and therefore we could say that we've found statistical evidence for H1 (mu0>mu1)
+
+YHasVehicle = CostLastTrip[VehicleInProperty=="Yes"]
+YNotHasVehicle = CostLastTrip[VehicleInProperty=="No"]
+boxplot(log(YHasVehicle),log(YNotHasVehicle))
+t.test(log(YHasVehicle),log(YNotHasVehicle),var.equal = F,alternative = "g")
+# In this case we cannot reject H0 and therefore we know nothing
+
+TypeOfNewMobility2 <- factor(TypeOfNewMobility[TypeOfNewMobility!="No"])
+CostLastTrip2 <- as.numeric(factor(CostLastTrip[TypeOfNewMobility!="No"]))
+
+boxplot(log(CostLastTrip2)~TypeOfNewMobility2)
+summary(aov(log(CostLastTrip2)~TypeOfNewMobility2))
+# Hay que acordarse de hacer alusi??n Coste dado que usas coche / Coste dado que NO usas coche
+### TODO
+# Hacer ANOVA para UsagePerMonth TypeOfNewMobility
 
 
 
