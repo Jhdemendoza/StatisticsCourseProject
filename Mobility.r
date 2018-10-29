@@ -599,12 +599,30 @@ t.test(log(YHasVehicle),log(YNotHasVehicle),var.equal = F,alternative = "g")
 
 TypeOfNewMobility2 <- factor(TypeOfNewMobility[TypeOfNewMobility!="No"])
 CostLastTrip2 <- as.numeric(factor(CostLastTrip[TypeOfNewMobility!="No"]))
+UsagePerMonth2 <- as.numeric(factor(UsagePerMonth[TypeOfNewMobility!="No"]))
 
+## ANOVA dado tres tipos de movilidad
+# H0 => muCar = muMoto = muOther?
+# H1 => muCar != muMoto o muCar != muOther o muMoto != muOther
 boxplot(log(CostLastTrip2)~TypeOfNewMobility2)
 summary(aov(log(CostLastTrip2)~TypeOfNewMobility2))
-# Hay que acordarse de hacer alusi??n Coste dado que usas coche / Coste dado que NO usas coche
+# In this case since p-vale = 0.116 > 0.05 we cannot reject the null Hypothesis, all the means being equal, and therefore we have no statistical evidence
+# to confirm that the type of mobility you use makes any difference in the cost of the last trip
+# Hay que acordarse de hacer alusion Coste dado que usas coche / Coste dado que NO usas coche
 ### TODO
 # Hacer ANOVA para UsagePerMonth TypeOfNewMobility
+boxplot(log(UsagePerMonth2)~TypeOfNewMobility2)
+summary(aov(log(UsagePerMonth2)~TypeOfNewMobility2))
+# In this case, as in the one before, since p-value = 0.348 >> 0.05, we cannot reject the null Hypothesis, and therefore we have no statistical evidence
+# to confirm that the type of mobility you use maker any difference in how many times someone uses new mobility
 
-
-
+### Two Quantitative Variable (Cost and UsagePerMonth)
+plot(log(CostLastTrip), log(UsagePerMonth))
+# Test for difference in the mean (doesn't have much sense to make this test... Each variable is measuring totally different things)
+t.test(log(CostLastTrip), log(UsagePerMonth), paired = T)
+# Test for linear dependency
+## H0 => Correlation = 0
+## H1 => Correlation != 0
+cor.test(log(CostLastTrip), log(UsagePerMonth))
+# As we can see, we cannot reject the null hypothesis, which implies null correlation, since p-value >> 0.05, which means
+# that there is almost no correlation between the variables given.
