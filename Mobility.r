@@ -620,6 +620,7 @@ summary(aov(log(UsagePerMonth2)~TypeOfNewMobility2))
 plot(log(CostLastTrip), log(UsagePerMonth))
 # Test for difference in the mean (doesn't have much sense to make this test... Each variable is measuring totally different things)
 t.test(log(CostLastTrip), log(UsagePerMonth), paired = T)
+# Since p-value = 0.0262 < 0.05 we can reject the null hypothesis (means being equal) and therefore we can conclude that the means are different
 # Test for linear dependency
 ## H0 => Correlation = 0
 ## H1 => Correlation != 0
